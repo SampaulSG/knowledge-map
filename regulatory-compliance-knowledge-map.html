@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regulatory Compliance Knowledge Map</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .visualization-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .insights-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .insights-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .insights-scroll-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 10px;
+        }
+
+        .insights-grid {
+            display: flex;
+            gap: 20px;
+            min-width: min-content;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn.active {
+            background: #764ba2;
+            color: white;
+        }
+
+        #network {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            min-width: 320px;
+            max-width: 320px;
+            flex-shrink: 0;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .insight-text {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .node-info {
+            position: absolute;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            pointer-events: none;
+            display: none;
+            max-width: 300px;
+            z-index: 1000;
+        }
+
+        .node-info h3 {
+            margin: 0 0 8px 0;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .node-info p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 140px;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Sampaul's Regulatory Compliance Knowledge Map</h1>
+            <p class="subtitle">Revealing the surprising patterns and hidden connections in 19 years of Life Sciences expertise. Each node represents a domain of knowledge, sized by depth of experience, colored by category, and connected by the relationships built between them.</p>
+        </div>
+
+        <div class="main-content">
+            <div class="insights-panel">
+                <div class="insights-header">
+                    <h2 style="color: #667eea; margin: 0; font-size: 22px;">🎯 Key Insights</h2>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-number">19</div>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Major Platforms</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Life Sciences Clients</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Regulatory Domains</div>
+                    </div>
+                </div>
+
+                <div class="insights-scroll-container">
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <div class="insight-title">🔄 The Migration-Validation Bridge</div>
+                            <div class="insight-text">Sampaul has built a rare combination: deep data migration expertise (Buldoser, PathBuilder, TRUmigrate) paired with validation leadership. Most professionals specialize in one or the other, but he bridges both—enabling him to ensure data integrity through the entire migration lifecycle, not just before or after.</div>
+                        </div>
+
+                        <div class="insight-card">
+                            <div class="insight-title">🏗️ The Architecture Evolution Pattern</div>
+                            <div class="insight-text">Sampaul's career shows a fascinating evolution from hands-on administration (Documentum, SharePoint) → data operations (migration, archival) → solutions architecture (Veeva) → AI-powered platforms (Saama). He didn't just climb vertically—he abstracted upward while maintaining technical depth.</div>
+                        </div>
+
+                        <div class="insight-card">
+                            <div class="insight-title">💊 The Pharma Compliance Trifecta</div>
+                            <div class="insight-text">Sampaul has mastered the three critical compliance domains in pharma: Clinical Data Management (Saama trials platform), Regulatory Submissions (Veeva RIM), and Manufacturing/Quality (Artwork Management). This trifecta is extremely rare—most specialists stay in one domain.</div>
+                        </div>
+
+                        <div class="insight-card">
+                            <div class="insight-title">🔍 The Hidden Governance Thread</div>
+                            <div class="insight-text">Throughout Sampaul's career, there's a persistent governance pattern: SharePoint audit response, CMDB/ServiceNow, Data Insight administration, ESI Support. He's not just a technical expert—he's the person organizations trust when compliance is under scrutiny or audit.</div>
+                        </div>
+
+                        <div class="insight-card">
+                            <div class="insight-title">🎯 The Quality-by-Design Mindset</div>
+                            <div class="insight-text">Sampaul's roles show increasing responsibility for lifecycle deliverables, RTM documents, and test automation. He doesn't just validate—he architects quality into systems from the start. This shift from reactive testing to proactive quality design is what separates senior principals from practitioners.</div>
+                        </div>
+
+                        <div class="insight-card">
+                            <div class="insight-title">⚡ The Integration Specialist Pattern</div>
+                            <div class="insight-text">A surprising pattern: Sampaul has repeatedly been the "integration person" across disconnected systems—Veeva integrations, Saama interoperability, cross-platform migrations. He thrives in the messy middle where systems meet, which is where most compliance challenges actually live.</div>
+                        </div>
+
+                        <div class="insight-card">
+                            <div class="insight-title">🌐 The Multi-Vendor Advantage</div>
+                            <div class="insight-text">Sampaul has worked with competing platforms (Veeva vs FirstDoc, Saama vs others) at different times. This gives him vendor-neutral perspective that's invaluable—he can compare approaches and choose best-fit solutions rather than being locked into one ecosystem.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization-panel">
+                <div class="controls">
+                    <button class="btn btn-primary active" data-view="all">All Connections</button>
+                    <button class="btn btn-secondary" data-view="validation">Validation Focus</button>
+                    <button class="btn btn-secondary" data-view="migration">Migration Expertise</button>
+                    <button class="btn btn-secondary" data-view="architecture">Architecture View</button>
+                </div>
+                <div id="network"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #667eea;"></div>
+                        <span>Core Platforms</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f093fb;"></div>
+                        <span>Regulatory Processes</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4facfe;"></div>
+                        <span>Technical Skills</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #43e97b;"></div>
+                        <span>Domain Expertise</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="node-info" id="tooltip"></div>
+
+    <script>
+        const data = {
+            nodes: [
+                // Core Platforms - Deep expertise
+                { id: 'veeva', label: 'Veeva Vault', size: 35, category: 'platform', description: 'Solutions Architect with 4+ years. RIM expert, Dev Factory lead, certified administrator.' },
+                { id: 'saama', label: 'Saama Platform', size: 38, category: 'platform', description: 'Senior Principal QA, 4 years. AI-powered clinical data platform expertise across full lifecycle.' },
+                { id: 'documentum', label: 'Documentum', size: 30, category: 'platform', description: '6+ years across multiple projects. xPlore integration, archival, administration.' },
+                { id: 'sharepoint', label: 'SharePoint', size: 25, category: 'platform', description: 'Audit response, governance, workflow automation with Nintex and AvePoint.' },
+                
+                // Regulatory Processes
+                { id: 'validation', label: 'Validation Leadership', size: 40, category: 'regulatory', description: 'Core competency spanning entire career. Lifecycle deliverables, test case coordination, SOPs.' },
+                { id: 'migration', label: 'Data Migration', size: 32, category: 'regulatory', description: 'Specialized expertise in pharma data migrations with integrity assurance and traceability.' },
+                { id: 'changeControl', label: 'Change Control', size: 28, category: 'regulatory', description: 'Change ownership across releases, problem management, CM processes.' },
+                { id: 'auditResponse', label: 'Audit & Compliance', size: 30, category: 'regulatory', description: 'Handled internal audits, ESI support, governance frameworks, compliance tracking.' },
+                
+                // Technical Skills
+                { id: 'testAutomation', label: 'Test Automation', size: 27, category: 'technical', description: 'Automated testing, Xray/Jira integration, IntelliJ development.' },
+                { id: 'integrations', label: 'System Integrations', size: 33, category: 'technical', description: 'Managed complex integrations between Vault systems, Saama modules, and external services.' },
+                { id: 'dataIntegrity', label: 'Data Integrity', size: 35, category: 'technical', description: 'Ensuring data quality through migrations, validations, and operational processes.' },
+                { id: 'devOps', label: 'Release Management', size: 26, category: 'technical', description: 'End-to-end release management, deployment coordination, build reviews.' },
+                
+                // Domain Expertise
+                { id: 'clinical', label: 'Clinical Trials', size: 36, category: 'domain', description: 'Saama LSAC, clinical data management, source-to-submission workflows.' },
+                { id: 'regulatory', label: 'Regulatory Submissions', size: 34, category: 'domain', description: 'Veeva RIM expertise, submission workflows, external service provider management.' },
+                { id: 'artwork', label: 'Packaging & Artwork', size: 22, category: 'domain', description: 'PAMS migration, Esko WebCenter, PaxPro experience with Allergan.' },
+                { id: 'governance', label: 'IT Governance', size: 24, category: 'domain', description: 'Data Insight, ServiceNow CMDB, governance frameworks, policy compliance.' },
+                
+                // Supporting nodes
+                { id: 'ai', label: 'AI/ML Platforms', size: 20, category: 'technical', description: 'Experience with AI-powered analytics in Saama for drug development insights.' },
+                { id: 'security', label: 'Security & Access', size: 22, category: 'regulatory', description: 'ESP security implementation, field-level security, role-based access.' }
+            ],
+            links: [
+                // Validation connections - the hub
+                { source: 'validation', target: 'saama', strength: 10, type: 'primary' },
+                { source: 'validation', target: 'veeva', strength: 9, type: 'primary' },
+                { source: 'validation', target: 'documentum', strength: 7, type: 'primary' },
+                { source: 'validation', target: 'dataIntegrity', strength: 10, type: 'primary' },
+                { source: 'validation', target: 'testAutomation', strength: 8, type: 'primary' },
+                { source: 'validation', target: 'clinical', strength: 9, type: 'primary' },
+                
+                // Migration expertise bridge
+                { source: 'migration', target: 'documentum', strength: 9, type: 'primary' },
+                { source: 'migration', target: 'dataIntegrity', strength: 10, type: 'primary' },
+                { source: 'migration', target: 'artwork', strength: 7, type: 'primary' },
+                { source: 'migration', target: 'validation', strength: 8, type: 'bridge' },
+                
+                // Architecture evolution
+                { source: 'veeva', target: 'integrations', strength: 9, type: 'primary' },
+                { source: 'veeva', target: 'regulatory', strength: 10, type: 'primary' },
+                { source: 'veeva', target: 'security', strength: 7, type: 'primary' },
+                { source: 'veeva', target: 'devOps', strength: 8, type: 'primary' },
+                
+                // Saama AI platform
+                { source: 'saama', target: 'clinical', strength: 10, type: 'primary' },
+                { source: 'saama', target: 'ai', strength: 8, type: 'primary' },
+                { source: 'saama', target: 'integrations', strength: 8, type: 'primary' },
+                { source: 'saama', target: 'testAutomation', strength: 7, type: 'primary' },
+                
+                // Governance thread
+                { source: 'auditResponse', target: 'sharepoint', strength: 8, type: 'primary' },
+                { source: 'auditResponse', target: 'governance', strength: 9, type: 'primary' },
+                { source: 'auditResponse', target: 'documentum', strength: 6, type: 'secondary' },
+                { source: 'governance', target: 'changeControl', strength: 7, type: 'secondary' },
+                
+                // Change control hub
+                { source: 'changeControl', target: 'veeva', strength: 8, type: 'primary' },
+                { source: 'changeControl', target: 'devOps', strength: 9, type: 'primary' },
+                { source: 'changeControl', target: 'validation', strength: 7, type: 'secondary' },
+                
+                // Cross-domain connections
+                { source: 'clinical', target: 'regulatory', strength: 6, type: 'bridge' },
+                { source: 'integrations', target: 'dataIntegrity', strength: 8, type: 'bridge' },
+                { source: 'testAutomation', target: 'devOps', strength: 7, type: 'secondary' },
+                { source: 'artwork', target: 'regulatory', strength: 5, type: 'secondary' },
+                
+                // Supporting connections
+                { source: 'security', target: 'governance', strength: 6, type: 'secondary' },
+                { source: 'ai', target: 'dataIntegrity', strength: 5, type: 'secondary' }
+            ]
+        };
+
+        const width = document.getElementById('network').offsetWidth;
+        const height = 600;
+
+        const svg = d3.select('#network')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        const g = svg.append('g');
+
+        // Add zoom
+        const zoom = d3.zoom()
+            .scaleExtent([0.5, 3])
+            .on('zoom', (event) => {
+                g.attr('transform', event.transform);
+            });
+        
+        svg.call(zoom);
+
+        const colorScale = {
+            platform: '#667eea',
+            regulatory: '#f093fb',
+            technical: '#4facfe',
+            domain: '#43e97b'
+        };
+
+        let currentView = 'all';
+
+        function filterLinks(view) {
+            const getNodeId = (node) => typeof node === 'object' ? node.id : node;
+            
+            switch(view) {
+                case 'validation':
+                    return data.links.filter(l => {
+                        const sourceId = getNodeId(l.source);
+                        const targetId = getNodeId(l.target);
+                        return sourceId === 'validation' || targetId === 'validation' ||
+                               sourceId === 'testAutomation' || targetId === 'testAutomation' ||
+                               sourceId === 'dataIntegrity' || targetId === 'dataIntegrity' ||
+                               sourceId === 'clinical' || targetId === 'clinical' ||
+                               sourceId === 'saama' || targetId === 'saama' ||
+                               sourceId === 'veeva' || targetId === 'veeva' ||
+                               sourceId === 'documentum' || targetId === 'documentum';
+                    });
+                case 'migration':
+                    return data.links.filter(l => {
+                        const sourceId = getNodeId(l.source);
+                        const targetId = getNodeId(l.target);
+                        return sourceId === 'migration' || targetId === 'migration' ||
+                               sourceId === 'dataIntegrity' || targetId === 'dataIntegrity' ||
+                               sourceId === 'documentum' || targetId === 'documentum' ||
+                               sourceId === 'artwork' || targetId === 'artwork' ||
+                               sourceId === 'validation' || targetId === 'validation';
+                    });
+                case 'architecture':
+                    return data.links.filter(l => {
+                        const sourceId = getNodeId(l.source);
+                        const targetId = getNodeId(l.target);
+                        return sourceId === 'veeva' || targetId === 'veeva' ||
+                               sourceId === 'saama' || targetId === 'saama' ||
+                               sourceId === 'integrations' || targetId === 'integrations' ||
+                               sourceId === 'devOps' || targetId === 'devOps' ||
+                               sourceId === 'regulatory' || targetId === 'regulatory' ||
+                               sourceId === 'clinical' || targetId === 'clinical' ||
+                               sourceId === 'security' || targetId === 'security' ||
+                               sourceId === 'ai' || targetId === 'ai';
+                    });
+                default:
+                    return data.links;
+            }
+        }
+
+        function updateVisualization(view) {
+            currentView = view;
+            
+            // Update button states
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.view === view) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Clear existing
+            g.selectAll('*').remove();
+
+            const filteredLinks = filterLinks(view);
+            const activeNodeIds = new Set();
+            filteredLinks.forEach(l => {
+                activeNodeIds.add(typeof l.source === 'object' ? l.source.id : l.source);
+                activeNodeIds.add(typeof l.target === 'object' ? l.target.id : l.target);
+            });
+
+            const filteredNodes = view === 'all' ? data.nodes : 
+                data.nodes.filter(n => activeNodeIds.has(n.id));
+
+            const simulation = d3.forceSimulation(filteredNodes)
+                .force('link', d3.forceLink(filteredLinks).id(d => d.id).distance(120).strength(d => d.strength / 10))
+                .force('charge', d3.forceManyBody().strength(-400))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => d.size + 5));
+
+            const link = g.append('g')
+                .selectAll('line')
+                .data(filteredLinks)
+                .join('line')
+                .attr('stroke', d => d.type === 'primary' ? '#999' : d.type === 'bridge' ? '#f093fb' : '#ddd')
+                .attr('stroke-opacity', d => d.type === 'primary' ? 0.6 : 0.3)
+                .attr('stroke-width', d => Math.sqrt(d.strength));
+
+            const node = g.append('g')
+                .selectAll('g')
+                .data(filteredNodes)
+                .join('g')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+
+            node.append('circle')
+                .attr('r', d => d.size)
+                .attr('fill', d => colorScale[d.category])
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 3)
+                .style('cursor', 'pointer');
+
+            node.append('text')
+                .text(d => d.label)
+                .attr('text-anchor', 'middle')
+                .attr('dy', d => d.size + 20)
+                .attr('font-size', '12px')
+                .attr('font-weight', '500')
+                .attr('fill', '#333')
+                .style('pointer-events', 'none');
+
+            const tooltip = d3.select('#tooltip');
+
+            node.on('mouseover', function(event, d) {
+                d3.select(this).select('circle')
+                    .transition()
+                    .duration(200)
+                    .attr('r', d.size * 1.2);
+
+                tooltip
+                    .style('display', 'block')
+                    .style('left', (event.pageX + 15) + 'px')
+                    .style('top', (event.pageY - 15) + 'px')
+                    .html(`<h3>${d.label}</h3><p>${d.description}</p>`);
+            })
+            .on('mouseout', function(event, d) {
+                d3.select(this).select('circle')
+                    .transition()
+                    .duration(200)
+                    .attr('r', d.size);
+
+                tooltip.style('display', 'none');
+            });
+
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                node.attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+        }
+
+        // Initial render
+        updateVisualization('all');
+
+        // Button handlers
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                updateVisualization(btn.dataset.view);
+            });
+        });
+    </script>
+</body>
+</html>
