@@ -45,12 +45,56 @@
         }
 
         .main-content {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: auto auto auto;
             gap: 20px;
         }
 
+        .insights-panel-top {
+            grid-column: 1 / 4;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .insights-panel-full {
+            grid-column: 1 / 4;
+            grid-row: 3;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .insights-panel-left {
+            grid-column: 1;
+            grid-row: 2;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .insights-panel-right {
+            grid-column: 3;
+            grid-row: 2;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
         .visualization-panel {
+            grid-column: 2;
+            grid-row: 2;
             background: white;
             border-radius: 15px;
             padding: 20px;
@@ -71,16 +115,11 @@
             margin-bottom: 20px;
         }
 
-        .insights-scroll-container {
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding-bottom: 10px;
-        }
-
-        .insights-grid {
-            display: flex;
-            gap: 20px;
-            min-width: min-content;
+        .insight-card-full {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
         }
 
         .controls {
@@ -137,9 +176,13 @@
             padding: 18px;
             border-radius: 10px;
             border-left: 4px solid #667eea;
-            min-width: 320px;
-            max-width: 320px;
-            flex-shrink: 0;
+        }
+
+        .insight-card-full {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
         }
 
         .insight-title {
@@ -229,6 +272,21 @@
             opacity: 0.9;
         }
 
+        @media (max-width: 1400px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+            }
+            
+            .insights-panel-top,
+            .insights-panel-full,
+            .insights-panel-left,
+            .visualization-panel,
+            .insights-panel-right {
+                grid-column: 1;
+                grid-row: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -239,7 +297,7 @@
         </div>
 
         <div class="main-content">
-            <div class="insights-panel">
+            <div class="insights-panel-top">
                 <div class="insights-header">
                     <h2 style="color: #667eea; margin: 0; font-size: 22px;">🎯 Key Insights</h2>
                 </div>
@@ -262,44 +320,22 @@
                         <div class="stat-label">Regulatory Domains</div>
                     </div>
                 </div>
+            </div>
 
-                <div class="insights-scroll-container">
-                    <div class="insights-grid">
-                        <div class="insight-card">
-                            <div class="insight-title">🔄 The Migration-Validation Bridge</div>
-                            <div class="insight-text">Sampaul has built a rare combination: deep data migration expertise (Buldoser, PathBuilder, TRUmigrate) paired with validation leadership. Most professionals specialize in one or the other, but he bridges both—enabling him to ensure data integrity through the entire migration lifecycle, not just before or after.</div>
-                        </div>
+            <div class="insights-panel-left">
+                <div class="insight-card">
+                    <div class="insight-title">🔄 The Migration-Validation Bridge</div>
+                    <div class="insight-text">Sampaul has built a rare combination: deep data migration expertise (Buldoser, PathBuilder, TRUmigrate) paired with validation leadership. Most professionals specialize in one or the other, but he bridges both—enabling him to ensure data integrity through the entire migration lifecycle, not just before or after.</div>
+                </div>
 
-                        <div class="insight-card">
-                            <div class="insight-title">🏗️ The Architecture Evolution Pattern</div>
-                            <div class="insight-text">Sampaul's career shows a fascinating evolution from hands-on administration (Documentum, SharePoint) → data operations (migration, archival) → solutions architecture (Veeva) → AI-powered platforms (Saama). He didn't just climb vertically—he abstracted upward while maintaining technical depth.</div>
-                        </div>
+                <div class="insight-card">
+                    <div class="insight-title">🏗️ The Architecture Evolution Pattern</div>
+                    <div class="insight-text">Sampaul's career shows a fascinating evolution from hands-on administration (Documentum, SharePoint) → data operations (migration, archival) → solutions architecture (Veeva) → AI-powered platforms (Saama). He didn't just climb vertically—he abstracted upward while maintaining technical depth.</div>
+                </div>
 
-                        <div class="insight-card">
-                            <div class="insight-title">💊 The Pharma Compliance Trifecta</div>
-                            <div class="insight-text">Sampaul has mastered the three critical compliance domains in pharma: Clinical Data Management (Saama trials platform), Regulatory Submissions (Veeva RIM), and Manufacturing/Quality (Artwork Management). This trifecta is extremely rare—most specialists stay in one domain.</div>
-                        </div>
-
-                        <div class="insight-card">
-                            <div class="insight-title">🔍 The Hidden Governance Thread</div>
-                            <div class="insight-text">Throughout Sampaul's career, there's a persistent governance pattern: SharePoint audit response, CMDB/ServiceNow, Data Insight administration, ESI Support. He's not just a technical expert—he's the person organizations trust when compliance is under scrutiny or audit.</div>
-                        </div>
-
-                        <div class="insight-card">
-                            <div class="insight-title">🎯 The Quality-by-Design Mindset</div>
-                            <div class="insight-text">Sampaul's roles show increasing responsibility for lifecycle deliverables, RTM documents, and test automation. He doesn't just validate—he architects quality into systems from the start. This shift from reactive testing to proactive quality design is what separates senior principals from practitioners.</div>
-                        </div>
-
-                        <div class="insight-card">
-                            <div class="insight-title">⚡ The Integration Specialist Pattern</div>
-                            <div class="insight-text">A surprising pattern: Sampaul has repeatedly been the "integration person" across disconnected systems—Veeva integrations, Saama interoperability, cross-platform migrations. He thrives in the messy middle where systems meet, which is where most compliance challenges actually live.</div>
-                        </div>
-
-                        <div class="insight-card">
-                            <div class="insight-title">🌐 The Multi-Vendor Advantage</div>
-                            <div class="insight-text">Sampaul has worked with competing platforms (Veeva vs FirstDoc, Saama vs others) at different times. This gives him vendor-neutral perspective that's invaluable—he can compare approaches and choose best-fit solutions rather than being locked into one ecosystem.</div>
-                        </div>
-                    </div>
+                <div class="insight-card">
+                    <div class="insight-title">💊 The Pharma Compliance Trifecta</div>
+                    <div class="insight-text">Sampaul has mastered the three critical compliance domains in pharma: Clinical Data Management (Saama trials platform), Regulatory Submissions (Veeva RIM), and Manufacturing/Quality (Artwork Management). This trifecta is extremely rare—most specialists stay in one domain.</div>
                 </div>
             </div>
 
@@ -328,6 +364,30 @@
                         <div class="legend-color" style="background: #43e97b;"></div>
                         <span>Domain Expertise</span>
                     </div>
+                </div>
+            </div>
+
+            <div class="insights-panel-right">
+                <div class="insight-card">
+                    <div class="insight-title">🔍 The Hidden Governance Thread</div>
+                    <div class="insight-text">Throughout Sampaul's career, there's a persistent governance pattern: SharePoint audit response, CMDB/ServiceNow, Data Insight administration, ESI Support. He's not just a technical expert—he's the person organizations trust when compliance is under scrutiny or audit.</div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-title">🎯 The Quality-by-Design Mindset</div>
+                    <div class="insight-text">Sampaul's roles show increasing responsibility for lifecycle deliverables, RTM documents, and test automation. He doesn't just validate—he architects quality into systems from the start. This shift from reactive testing to proactive quality design is what separates senior principals from practitioners.</div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-title">⚡ The Integration Specialist Pattern</div>
+                    <div class="insight-text">A surprising pattern: Sampaul has repeatedly been the "integration person" across disconnected systems—Veeva integrations, Saama interoperability, cross-platform migrations. He thrives in the messy middle where systems meet, which is where most compliance challenges actually live.</div>
+                </div>
+            </div>
+
+            <div class="insights-panel-full">
+                <div class="insight-card-full">
+                    <div class="insight-title">🌐 The Multi-Vendor Advantage</div>
+                    <div class="insight-text">Sampaul has worked with competing platforms (Veeva vs FirstDoc, Saama vs others) at different times. This gives him vendor-neutral perspective that's invaluable—he can compare approaches and choose best-fit solutions rather than being locked into one ecosystem.</div>
                 </div>
             </div>
         </div>
